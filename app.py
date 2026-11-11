@@ -110,13 +110,14 @@ with tab1:
 
 
 # ==========================================
+# ==========================================
 # TAB 2: Word Guess (Word / Vocabulary)
 # ==========================================
 with tab2:
     st.header("🔤 Word Guess Challenge")
     st.write("Guess the 5-letter secret word related to engineering or planning!")
 
-    word_list = ["STEEL",PLANT", "LEAN", "QUEUE", "AGILE", "CRANE"]
+    word_list = ["STEEL", "PLANT", "LEAN", "QUEUE", "AGILE", "CRANE"]
 
     if "secret_word" not in st.session_state:
         st.session_state.secret_word = random.choice(word_list)
@@ -153,8 +154,6 @@ with tab2:
         st.session_state.secret_word = random.choice(word_list)
         st.session_state.word_guesses = []
         st.rerun()
-
-
 # ==========================================
 # TAB 3: High-Low Reflex (Arcade / Numbers)
 # ==========================================
