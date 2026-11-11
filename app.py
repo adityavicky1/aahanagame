@@ -155,6 +155,7 @@ with tab2:
         st.session_state.word_guesses = []
         st.rerun()
 # ==========================================
+# ==========================================
 # TAB 3: High-Low Reflex (Arcade / Numbers)
 # ==========================================
 with tab3:
@@ -166,7 +167,7 @@ with tab3:
         st.session_state.attempts = 0
 
     user_val = st.number_input(
-        "Enter your guess:", min_val=1, max_val=100, step=1, key="hl_input"
+        "Enter your guess:", min_value=1, max_value=100, step=1, key="hl_input"
     )
 
     if st.button("Check Guess"):
@@ -184,7 +185,6 @@ with tab3:
         st.session_state.target_num = random.randint(1, 100)
         st.session_state.attempts = 0
         st.rerun()
-
 
 # ==========================================
 # TAB 4: Mini Blackjack (Card / Probability)
