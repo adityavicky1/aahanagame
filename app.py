@@ -3,7 +3,7 @@ import streamlit as st
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="Toddler Fun Arcade", page_icon="🎈", layout="wide"
+    page_title="Aahana's Play Zone", page_icon="🌟", layout="wide"
 )
 
 # --- PASSWORD AUTHENTICATION SETUP ---
@@ -14,7 +14,7 @@ if "authenticated" not in st.session_state:
 
 if not st.session_state.authenticated:
     st.markdown(
-        "<h2 style='text-align: center;'>🔐 Parent Login to Toddler Arcade</h2>",
+        "<h2 style='text-align: center;'>🔐 Parent Login to Aahana's Play Zone</h2>",
         unsafe_allow_html=True,
     )
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -23,7 +23,7 @@ if not st.session_state.authenticated:
             entered_password = st.text_input(
                 "Enter Password (default: admin)", type="password"
             )
-            submit_btn = st.form_submit_button("Enter Arcade")
+            submit_btn = st.form_submit_button("Enter Play Zone")
             if submit_btn:
                 if entered_password == APP_PASSWORD:
                     st.session_state.authenticated = True
@@ -33,125 +33,99 @@ if not st.session_state.authenticated:
     st.stop()  # Stop execution until authenticated
 
 # --- MAIN TODDLER APP ---
-st.title("🌟 Aahana's Toddler Play Zone 🌟")
-st.write(
-    "Welcome! Choose a game below designed especially for little fingers and big imaginations."
+st.markdown(
+    "<h1 style='text-align: center; color: #FF4B4B;'>🌟 Aahana's Interactive Play Zone 🌟</h1>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<h4 style='text-align: center; color: #555;'>Pick a game tab below and have fun!</h4>",
+    unsafe_allow_html=True,
 )
 
-# Create 3 Tabs for the 3 Toddler Games
-tab1, tab2, tab3 = st.tabs(
-    ["🎈 Balloon Pop", "🎨 Color & Shape Match", "🦁 Animal Sound Box"]
+# Create 4 Interactive Tabs
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["🎈 Magic Balloon Pop", "🍎 Fruit Counting", "🦁 Animal Sound Box", "🎨 Color Matcher"]
 )
 
 # ==========================================
-# TAB 1: BALLOON POP
+# TAB 1: MAGIC BALLOON POP (Interactive Counter & Pop Effects)
 # ==========================================
 with tab1:
-    st.header("🎈 Pop the Balloons!")
-    st.write("Tap the buttons below to pop the balloons!")
+    st.header("🎈 Magic Balloon Pop")
+    st.write("Tap the colorful balloons below to pop them and watch the counter grow!")
 
-    if "balloons_popped" not in st.session_state:
-        st.session_state.balloons_popped = 0
+    if "balloon_score" not in st.session_state:
+        st.session_state.balloon_score = 0
 
-    balloon_cols = st.columns(5)
-    colors = ["🔴", "🔵", "🟢", "🟡", "🟣"]
-    names = ["Red", "Blue", "Green", "Yellow", "Purple"]
+    col1, col2, col3, col4, col5 = st.columns(5)
+    balloons = [
+        ("🔴 Red", "pop_red"),
+        ("🔵 Blue", "pop_blue"),
+        ("🟢 Green", "pop_green"),
+        ("🟡 Yellow", "pop_yellow"),
+        ("🟣 Purple", "pop_purple"),
+    ]
 
-    for i in range(5):
-        with balloon_cols[i]:
-            if st.button(f"{colors[i]}\nPop!", key=f"balloon_{i}"):
+    for idx, (b_label, b_key) in enumerate(balloons):
+        with [col1, col2, col3, col4, col5][idx]:
+            if st.button(b_label, key=b_key, use_container_width=True):
                 st.balloons()
-                st.session_state.balloons_popped += 1
-                st.success(f"Pop! You popped the {names[i]} balloon!")
+                st.session_state.balloon_score += 1
+                st.success(f"Pop! 🎉 ({b_label})")
 
-    st.write(
-        f"### 🎉 Total Balloons Popped: {st.session_state.balloons_popped}"
-    )
+    st.markdown(f"### 🏆 Total Pops: **{st.session_state.balloon_score}**")
 
     if st.button("🔄 Reset Balloons"):
-        st.session_state.balloons_popped = 0
+        st.session_state.balloon_score = 0
         st.rerun()
 
 # ==========================================
-# TAB 2: COLOR & SHAPE MATCH
+# TAB 2: FRUIT COUNTING (Interactive Math Game)
 # ==========================================
 with tab2:
-    st.header("🎨 Match the Colors")
-    st.write("Can you find the matching color box?")
+    st.header("🍎 Fruit Counting Adventure")
+    st.write("Count the fruits on the screen and tap the correct number!")
 
-    if "target_color" not in st.session_state:
-        st.session_state.target_color = random.choice(
-            ["Red", "Blue", "Green", "Yellow"]
-        )
-        st.session_state.match_score = 0
+    if "target_count" not in st.session_state:
+        st.session_state.target_count = random.randint(1, 5)
+        st.session_state.fruit_score = 0
 
-    target = st.session_state.target_color
+    target = st.session_state.target_count
+    fruit_icon = random.choice(["🍎", "🍌", "🍓", "🍊", "🍇"])
+
+    # Display row of fruits visually
     st.markdown(
-        f"<h3 style='text-align: center; color: #333;'>Find and click the: <span style='color: blue;'>{target}</span> box!</h3>",
+        f"<h2 style='text-align: center; background-color: #f0f2f6; padding: 20px; border-radius: 10px;'>{fruit_icon * target}</h2>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<p style='text-align: center; font-weight: bold;'>How many fruits do you see?</p>",
         unsafe_allow_html=True,
     )
 
-    c1, c2, c3, c4 = st.columns(4)
+    btn_cols = st.columns(5)
+    for i in range(1, 6):
+        with btn_cols[i - 1]:
+            if st.button(str(i), key=f"count_{i}", use_container_width=True):
+                if i == target:
+                    st.balloons()
+                    st.success(
+                        f"🌟 Correct! There are {target} {fruit_icon} fruits!"
+                    )
+                    st.session_state.fruit_score += 1
+                    st.session_state.target_count = random.randint(1, 5)
+                    st.rerun()
+                else:
+                    st.error("❌ Not quite! Try counting again.")
 
-    colors_dict = {
-        "Red": "🔴",
-        "Blue": "🔵",
-        "Green": "🟢",
-        "Yellow": "🟡",
-    }
-
-    with c1:
-        if st.button("🔴 Red", key="btn_red"):
-            chosen = "Red"
-            if chosen == target:
-                st.success("🌟 Yay! Correct!")
-                st.session_state.match_score += 1
-                st.session_state.target_color = random.choice(list(colors_dict.keys()))
-                st.rerun()
-            else:
-                st.error("Oops! Try again.")
-
-    with c2:
-        if st.button("🔵 Blue", key="btn_blue"):
-            chosen = "Blue"
-            if chosen == target:
-                st.success("🌟 Yay! Correct!")
-                st.session_state.match_score += 1
-                st.session_state.target_color = random.choice(list(colors_dict.keys()))
-                st.rerun()
-            else:
-                st.error("Oops! Try again.")
-
-    with c3:
-        if st.button("🟢 Green", key="btn_green"):
-            chosen = "Green"
-            if chosen == target:
-                st.success("🌟 Yay! Correct!")
-                st.session_state.match_score += 1
-                st.session_state.target_color = random.choice(list(colors_dict.keys()))
-                st.rerun()
-            else:
-                st.error("Oops! Try again.")
-
-    with c4:
-        if st.button("🟡 Yellow", key="btn_yellow"):
-            chosen = "Yellow"
-            if chosen == target:
-                st.success("🌟 Yay! Correct!")
-                st.session_state.match_score += 1
-                st.session_state.target_color = random.choice(list(colors_dict.keys()))
-                st.rerun()
-            else:
-                st.error("Oops! Try again.")
-
-    st.write(f"**Score:** {st.session_state.match_score} 🏆")
+    st.markdown(f"**Score:** {st.session_state.fruit_score} 🎯")
 
 # ==========================================
-# TAB 3: ANIMAL SOUND EXPLORER
+# TAB 3: ANIMAL SOUND BOX (Interactive Audio-Visuals)
 # ==========================================
 with tab3:
     st.header("🦁 Animal Sound Box")
-    st.write("Click an animal to see what it says!")
+    st.write("Tap your favorite animal to hear what they say!")
 
     animal_cols = st.columns(4)
     animals = [
@@ -163,16 +137,67 @@ with tab3:
 
     for idx, animal in enumerate(animals):
         with animal_cols[idx]:
-            if st.button(f"{animal['emoji']}\n{animal['name']}", key=f"animal_{idx}"):
+            if st.button(
+                f"{animal['emoji']}\n{animal['name']}",
+                key=f"animal_{idx}",
+                use_container_width=True,
+            ):
+                st.snow()
                 st.markdown(
-                    f"<h2 style='text-align: center;'>{animal['emoji']} The {animal['name']} says: <b>{animal['sound']}</b></h2>",
+                    f"<div style='text-align: center; padding: 15px; background-color: #e6f4ea; border-radius: 10px;'>"
+                    f"<h2>{animal['emoji']} The {animal['name']}</h2>"
+                    f"<h3>Says: <b>{animal['sound']}</b></h3>"
+                    f"</div>",
                     unsafe_allow_html=True,
                 )
-                st.balloons()
+
+# ==========================================
+# TAB 4: COLOR MATCHER (Interactive Color Game)
+# ==========================================
+with tab4:
+    st.header("🎨 Color Matching Challenge")
+    st.write("Find and click the matching color name!")
+
+    if "color_target" not in st.session_state:
+        st.session_state.color_target = random.choice(
+            ["Red", "Blue", "Green", "Yellow"]
+        )
+        st.session_state.color_score = 0
+
+    c_target = st.session_state.color_target
+    st.markdown(
+        f"<h3 style='text-align: center;'>Can you find the box for: <span style='color: #ff4b4b; font-size: 1.2em;'>{c_target}</span>?</h3>",
+        unsafe_allow_html=True,
+    )
+
+    cc1, cc2, cc3, cc4 = st.columns(4)
+
+    colors_list = [
+        ("🔴 Red", "Red", cc1),
+        ("🔵 Blue", "Blue", cc2),
+        ("🟢 Green", "Green", cc3),
+        ("🟡 Yellow", "Yellow", cc4),
+    ]
+
+    for label, col_name, col_obj in colors_list:
+        with col_obj:
+            if st.button(label, key=f"col_btn_{col_name}", use_container_width=True):
+                if col_name == c_target:
+                    st.balloons()
+                    st.success("🎉 Awesome job matching the color!")
+                    st.session_state.color_score += 1
+                    st.session_state.color_target = random.choice(
+                        ["Red", "Blue", "Green", "Yellow"]
+                    )
+                    st.rerun()
+                else:
+                    st.error("Oops! Try another color.")
+
+    st.markdown(f"**Score:** {st.session_state.color_score} 🌈")
 
 # --- FOOTER ---
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: gray;'>Made with ❤️ for Toddler Fun via Streamlit</p>",
+    "<p style='text-align: center; color: gray;'>Made with ❤️ for Aahana | Streamlit Interactive Play Zone</p>",
     unsafe_allow_html=True,
 )
