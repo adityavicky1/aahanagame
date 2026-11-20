@@ -44,11 +44,11 @@ st.markdown(
     "<h4 style='text-align: center; color: #555;'>Build animations with Scratch blocks or play fun games below!</h4>",
     unsafe_allow_html=True,
 )
-
-# Create 5 Interactive Tabs including the new Scratch-like Coding Studio
-tab_scratch, tab1, tab2, tab3, tab4 = st.tabs(
+# Create 6 Interactive Tabs including the Scratch-like Coding Studio and Rainbow Piano
+tab_scratch, tab_piano, tab1, tab2, tab3, tab4 = st.tabs(
     [
         "🧩 Scratch Coding Studio",
+        "🎹 Rainbow Piano",
         "🎈 Magic Balloon Pop",
         "🍎 Fruit Counting",
         "🦁 Animal Sound Box",
@@ -332,6 +332,235 @@ with tab_scratch:
     </html>
     """
     components.html(scratch_html, height=560, scrolling=False)
+
+# ==========================================
+# TAB 0.5: INTERACTIVE RAINBOW PIANO STUDIO
+# ==========================================
+with tab_piano:
+    st.header("🎹 Aahana's Rainbow Piano Studio")
+    st.write("Tap the colorful piano keys to make music, switch instruments, or follow the glowing notes to play a song!")
+
+    piano_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+        <style>
+            .piano-key {
+                transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+                user-select: none;
+                cursor: pointer;
+            }
+            .piano-key:active, .key-active {
+                transform: translateY(8px) scale(0.98);
+                box-shadow: 0 2px 0 rgba(0,0,0,0.25) !important;
+                filter: brightness(1.15);
+            }
+            .key-guide {
+                ring: 6px solid #facc15;
+                animation: pulseGuide 0.8s infinite alternate;
+            }
+            @keyframes pulseGuide {
+                from { transform: scale(1); box-shadow: 0 0 10px #facc15; }
+                to { transform: scale(1.04); box-shadow: 0 0 25px #eab308; }
+            }
+            @keyframes floatNote {
+                0% { transform: translateY(0) scale(0.8); opacity: 1; }
+                100% { transform: translateY(-90px) scale(1.4); opacity: 0; }
+            }
+            .floating-note {
+                position: absolute;
+                pointer-events: none;
+                animation: floatNote 1s ease-out forwards;
+                font-size: 2rem;
+                z-index: 30;
+            }
+        </style>
+    </head>
+    <body class="bg-slate-50 p-3 font-sans">
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 max-w-4xl mx-auto relative overflow-hidden" id="pianoContainer">
+            
+            <!-- Top Controls: Instrument & Song Guide -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-slate-100 p-4 rounded-2xl">
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mr-1">Sound:</span>
+                    <button onclick="setInstrument('piano')" id="inst-piano" class="inst-btn bg-indigo-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow transition">🎹 Piano</button>
+                    <button onclick="setInstrument('xylophone')" id="inst-xylophone" class="inst-btn bg-white text-slate-700 hover:bg-indigo-50 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm transition">🎶 Xylophone</button>
+                    <button onclick="setInstrument('synth')" id="inst-synth" class="inst-btn bg-white text-slate-700 hover:bg-indigo-50 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm transition">🚀 Space Synth</button>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mr-1">Play Song:</span>
+                    <button onclick="startSong('twinkle')" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">⭐ Twinkle Star</button>
+                    <button onclick="startSong('mary')" class="bg-pink-500 hover:bg-pink-600 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs shadow transition">🐑 Mary's Lamb</button>
+                    <button onclick="stopSong()" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition">Stop</button>
+                </div>
+            </div>
+
+            <!-- Song Status Banner -->
+            <div id="songBanner" class="hidden text-center mb-4 py-2 px-4 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 font-bold text-sm">
+                Tap the glowing key! ✨
+            </div>
+
+            <!-- Rainbow Piano Keys -->
+            <div class="grid grid-cols-8 gap-2 sm:gap-3 h-56 sm:h-64 pt-2 pb-3 px-1">
+                <div id="key-C4" onmousedown="pressKey('C4', '🔴', event)" ontouchstart="pressKey('C4', '🔴', event)" style="box-shadow: 0 8px 0 #b91c1c;" class="piano-key bg-red-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">DO</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">C</span>
+                </div>
+                <div id="key-D4" onmousedown="pressKey('D4', '🟠', event)" ontouchstart="pressKey('D4', '🟠', event)" style="box-shadow: 0 8px 0 #c2410c;" class="piano-key bg-orange-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">RE</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">D</span>
+                </div>
+                <div id="key-E4" onmousedown="pressKey('E4', '🟡', event)" ontouchstart="pressKey('E4', '🟡', event)" style="box-shadow: 0 8px 0 #a16207;" class="piano-key bg-yellow-400 rounded-2xl flex flex-col justify-end items-center pb-4 text-slate-900 font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">MI</span>
+                    <span class="text-xs bg-black/10 px-2 py-0.5 rounded-full">E</span>
+                </div>
+                <div id="key-F4" onmousedown="pressKey('F4', '🟢', event)" ontouchstart="pressKey('F4', '🟢', event)" style="box-shadow: 0 8px 0 #15803d;" class="piano-key bg-green-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">FA</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">F</span>
+                </div>
+                <div id="key-G4" onmousedown="pressKey('G4', '🩵', event)" ontouchstart="pressKey('G4', '🩵', event)" style="box-shadow: 0 8px 0 #0e7490;" class="piano-key bg-cyan-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">SOL</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">G</span>
+                </div>
+                <div id="key-A4" onmousedown="pressKey('A4', '🔵', event)" ontouchstart="pressKey('A4', '🔵', event)" style="box-shadow: 0 8px 0 #1d4ed8;" class="piano-key bg-blue-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">LA</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">A</span>
+                </div>
+                <div id="key-B4" onmousedown="pressKey('B4', '🟣', event)" ontouchstart="pressKey('B4', '🟣', event)" style="box-shadow: 0 8px 0 #6d28d9;" class="piano-key bg-purple-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">TI</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">B</span>
+                </div>
+                <div id="key-C5" onmousedown="pressKey('C5', '🩷', event)" ontouchstart="pressKey('C5', '🩷', event)" style="box-shadow: 0 8px 0 #be185d;" class="piano-key bg-pink-500 rounded-2xl flex flex-col justify-end items-center pb-4 text-white font-extrabold select-none">
+                    <span class="text-xl sm:text-2xl mb-1">DO!</span>
+                    <span class="text-xs bg-black/20 px-2 py-0.5 rounded-full">C5</span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let currentInstrument = 'piano';
+            const songs = {
+                twinkle: ['C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4'],
+                mary: ['E4', 'D4', 'C4', 'D4', 'E4', 'E4', 'E4', 'D4', 'D4', 'D4', 'E4', 'G4', 'G4']
+            };
+            let activeSong = null;
+            let songStep = 0;
+
+            function setInstrument(type) {
+                currentInstrument = type;
+                document.querySelectorAll('.inst-btn').forEach(btn => {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-700');
+                });
+                const activeBtn = document.getElementById(`inst-${type}`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('bg-white', 'text-slate-700');
+                    activeBtn.classList.add('bg-indigo-600', 'text-white');
+                }
+            }
+
+            function playNoteSound(note) {
+                try {
+                    if (Tone.context.state !== 'running') {
+                        Tone.start();
+                    }
+                    let synth;
+                    if (currentInstrument === 'xylophone') {
+                        synth = new Tone.MetalSynth({
+                            harmonicity: 5.1,
+                            modulationIndex: 16,
+                            resonance: 4000,
+                            octaves: 1.5
+                        }).toDestination();
+                        synth.triggerAttackRelease(note, "16n");
+                    } else if (currentInstrument === 'synth') {
+                        synth = new Tone.AMSynth().toDestination();
+                        synth.triggerAttackRelease(note, "8n");
+                    } else {
+                        synth = new Tone.PolySynth(Tone.Synth, {
+                            oscillator: { type: "triangle" },
+                            envelope: { attack: 0.02, decay: 0.2, sustain: 0.2, release: 0.8 }
+                        }).toDestination();
+                        synth.triggerAttackRelease(note, "8n");
+                    }
+                } catch (e) {}
+            }
+
+            function spawnFloatingEmoji(event, badge) {
+                const container = document.getElementById('pianoContainer');
+                const rect = container.getBoundingClientRect();
+                const el = document.createElement('div');
+                const icons = ['🎵', '🎶', '⭐', '💖', badge];
+                el.innerText = icons[Math.floor(Math.random() * icons.length)];
+                el.className = 'floating-note';
+                
+                const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+                const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+                
+                el.style.left = `${(clientX - rect.left) - 15}px`;
+                el.style.top = `${(clientY - rect.top) - 20}px`;
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            }
+
+            function clearHighlights() {
+                document.querySelectorAll('.piano-key').forEach(k => k.classList.remove('key-guide'));
+            }
+
+            function highlightNextKey() {
+                clearHighlights();
+                if (!activeSong) return;
+                const targetNote = songs[activeSong][songStep];
+                const keyEl = document.getElementById(`key-${targetNote}`);
+                if (keyEl) {
+                    keyEl.classList.add('key-guide');
+                }
+            }
+
+            function startSong(songName) {
+                activeSong = songName;
+                songStep = 0;
+                const banner = document.getElementById('songBanner');
+                banner.innerText = "Follow the glowing rainbow key! 🌟";
+                banner.classList.remove('hidden');
+                highlightNextKey();
+            }
+
+            function stopSong() {
+                activeSong = null;
+                songStep = 0;
+                clearHighlights();
+                document.getElementById('songBanner').classList.add('hidden');
+            }
+
+            function pressKey(note, badge, event) {
+                if (event && event.type === 'touchstart') event.preventDefault();
+                playNoteSound(note);
+                if (event) spawnFloatingEmoji(event, badge);
+
+                if (activeSong) {
+                    const expectedNote = songs[activeSong][songStep];
+                    if (note === expectedNote) {
+                        songStep++;
+                        if (songStep >= songs[activeSong].length) {
+                            document.getElementById('songBanner').innerText = "🎉 Yay Aahana! You played the whole song! 🎉";
+                            clearHighlights();
+                            activeSong = null;
+                        } else {
+                            highlightNextKey();
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
+    components.html(piano_html, height=430, scrolling=False)
 
 # ==========================================
 # TAB 1: MAGIC BALLOON POP (Interactive Counter & Pop Effects)
